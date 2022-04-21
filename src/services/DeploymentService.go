@@ -16,6 +16,8 @@ type DeploymentService struct {
 func NewDeploymentService() *DeploymentService {
 	return &DeploymentService{}
 }
+
+// 调度信息
 func (*DeploymentService) getDeploymentCondition(dep *v1.Deployment) string {
 	for _, item := range dep.Status.Conditions {
 		if string(item.Type) == "Available" && string(item.Status) != "True" {
@@ -24,6 +26,8 @@ func (*DeploymentService) getDeploymentCondition(dep *v1.Deployment) string {
 	}
 	return ""
 }
+
+//是否完成
 func (*DeploymentService) getDeploymentIsComplete(dep *v1.Deployment) bool {
 	return dep.Status.Replicas == dep.Status.AvailableReplicas
 }
