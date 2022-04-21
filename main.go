@@ -4,6 +4,7 @@ import (
 	"github.com/shenyisyn/goft-gin/goft"
 	"k8sapi/src/configs"
 	"k8sapi/src/controllers"
+	"k8sapi/src/middlewares"
 )
 
 func main() {
@@ -13,6 +14,7 @@ func main() {
 		configs.NewK8sMaps(),       //3
 		configs.NewServiceConfig(), //4
 	).
-		Mount("v1", controllers.NewDeploymentCtl()).
+		Attach(middlewares.NewCorsMiddleware()).
+		Mount("v1", controllers.NewDeploymentCtl(), controllers.NewPodCtl()).
 		Launch()
 }

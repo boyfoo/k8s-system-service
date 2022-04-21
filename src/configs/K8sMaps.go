@@ -17,3 +17,7 @@ func NewK8sMaps() *K8sMaps {
 func (this *K8sMaps) InitDepMap() *core.DeploymentMap {
 	return &core.DeploymentMap{}
 }
+
+func (this *K8sMaps) InitPodMap() *core.PodMap {
+	return &core.PodMap{}
+}

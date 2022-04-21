@@ -14,6 +14,6 @@ func (this *K8sHandler) DepHandlers() *core.DepHandler {
 	return &core.DepHandler{}
 }
 
-//func(this *K8sHandler) PodHandlers() *core.DepHandler{
-//	return &core.DepHandler{}
-//}
+func (this *K8sHandler) PodHandlers() *core.PodHandler {
+	return &core.PodHandler{}
+}
