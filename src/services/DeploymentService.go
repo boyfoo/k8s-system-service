@@ -44,5 +44,6 @@ func (this *DeploymentService) ListAll(namespace string) (ret []*models.Deployme
 			Message:    this.getDeploymentCondition(item),
 		})
 	}
+
 	return
 }

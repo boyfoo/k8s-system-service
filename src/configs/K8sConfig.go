@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8sapi/src/core"
 	"log"
+	"os/user"
 )
 
 type K8sConfig struct {
@@ -19,15 +20,34 @@ func NewK8sConfig() *K8sConfig {
 
 //初始化客户端
 func (*K8sConfig) InitClient() *kubernetes.Clientset {
-	config := &rest.Config{
-		Host: "https://192.168.99.101:8443/",
-		//
-		TLSClientConfig: rest.TLSClientConfig{
-			CAFile:   "/Users/rxt/.minikube/ca.crt",
-			KeyFile:  "/Users/rxt/.minikube/profiles/minikube/client.key",
-			CertFile: "/Users/rxt/.minikube/profiles/minikube/client.crt",
-		},
+
+	currentUser, err := user.Current()
+	if err != nil {
+		log.Fatalf(err.Error())
 	}
+
+	var config *rest.Config
+
+	if "zx" == currentUser.Username {
+		config = &rest.Config{
+			Host:        "https://node01:8443/k8s/clusters/c-c9c5p",
+			BearerToken: "kubeconfig-user-whq6g:ztjtlgcbs9vpqgcl9bqjpn598x629spvhdk74gv4kcpk8clvrddmzp",
+			TLSClientConfig: rest.TLSClientConfig{ // 不验证响应tls
+				Insecure: true,
+			},
+		}
+	} else {
+		config = &rest.Config{
+			Host: "https://192.168.99.101:8443/",
+			//
+			TLSClientConfig: rest.TLSClientConfig{
+				CAFile:   "/Users/rxt/.minikube/ca.crt",
+				KeyFile:  "/Users/rxt/.minikube/profiles/minikube/client.key",
+				CertFile: "/Users/rxt/.minikube/profiles/minikube/client.crt",
+			},
+		}
+	}
+
 	c, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatal(err)

@@ -16,7 +16,7 @@ func NewDeploymentCtl() *DeploymentCtl {
 	return &DeploymentCtl{}
 }
 func (this *DeploymentCtl) GetList(c *gin.Context) goft.Json {
-	return this.DepService.ListAll("default")
+	return this.DepService.ListAll("istio-system")
 
 }
 func (this *DeploymentCtl) Build(goft *goft.Goft) {
