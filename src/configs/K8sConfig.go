@@ -19,7 +19,7 @@ func NewK8sConfig() *K8sConfig {
 
 //初始化客户端
 func (*K8sConfig) InitClient() *kubernetes.Clientset {
-	c, err := kubernetes.NewForConfig(&rest.Config{
+	config := &rest.Config{
 		Host: "https://192.168.99.101:8443/",
 		//
 		TLSClientConfig: rest.TLSClientConfig{
@@ -27,7 +27,8 @@ func (*K8sConfig) InitClient() *kubernetes.Clientset {
 			KeyFile:  "/Users/rxt/.minikube/profiles/minikube/client.key",
 			CertFile: "/Users/rxt/.minikube/profiles/minikube/client.crt",
 		},
-	})
+	}
+	c, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatal(err)
 	}
