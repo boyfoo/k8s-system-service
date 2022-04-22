@@ -16,7 +16,11 @@ func NewPodCtl() *PodCtl {
 	return &PodCtl{}
 }
 func (this *PodCtl) GetList(c *gin.Context) goft.Json {
-	return this.PodService.ListByNs("istio-system")
+	ns := c.DefaultQuery("ns", "default")
+	return gin.H{
+		"code": 20000,
+		"data": this.PodService.ListByNs(ns),
+	}
 }
 func (this *PodCtl) Build(goft *goft.Goft) {
 	//路由
