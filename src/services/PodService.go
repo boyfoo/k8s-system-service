@@ -2,7 +2,7 @@ package services
 
 //@Service
 type PodService struct {
-	PodMap *PodMap        `inject:"-"`
+	PodMap *PodMapStruct  `inject:"-"`
 	Common *CommonService `inject:"-"`
 }
 

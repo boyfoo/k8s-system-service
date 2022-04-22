@@ -18,6 +18,12 @@ func (this *K8sMaps) InitDepMap() *services.DeploymentMap {
 	return &services.DeploymentMap{}
 }
 
-func (this *K8sMaps) InitPodMap() *services.PodMap {
-	return &services.PodMap{}
+//初始化 podmap
+func (this *K8sMaps) InitPodMap() *services.PodMapStruct {
+	return &services.PodMapStruct{}
+}
+
+//初始化 nsmap
+func (this *K8sMaps) InitNsMap() *services.NsMapStruct {
+	return &services.NsMapStruct{}
 }

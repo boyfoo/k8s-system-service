@@ -5,14 +5,16 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"os/user"
+
 	"k8sapi/src/services"
 	"log"
-	"os/user"
 )
 
 type K8sConfig struct {
 	DepHandler *services.DepHandler `inject:"-"`
 	PodHandler *services.PodHandler `inject:"-"`
+	NsHandler  *services.NsHandler  `inject:"-"`
 }
 
 func NewK8sConfig() *K8sConfig {
@@ -21,7 +23,6 @@ func NewK8sConfig() *K8sConfig {
 
 //初始化客户端
 func (*K8sConfig) InitClient() *kubernetes.Clientset {
-
 	currentUser, err := user.Current()
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -48,7 +49,6 @@ func (*K8sConfig) InitClient() *kubernetes.Clientset {
 			},
 		}
 	}
-
 	c, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatal(err)
@@ -63,8 +63,11 @@ func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 	depInformer := fact.Apps().V1().Deployments()
 	depInformer.Informer().AddEventHandler(this.DepHandler)
 
-	podInformer := fact.Core().V1().Pods()
+	podInformer := fact.Core().V1().Pods() //监听pod
 	podInformer.Informer().AddEventHandler(this.PodHandler)
+
+	nsInformer := fact.Core().V1().Namespaces() //监听namespace
+	nsInformer.Informer().AddEventHandler(this.NsHandler)
 
 	fact.Start(wait.NeverStop)
 

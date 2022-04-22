@@ -8,17 +8,17 @@ import (
 )
 
 // 保存Pod集合
-type PodMap struct {
+type PodMapStruct struct {
 	data sync.Map // [key string] []*v1.Pod    key=>namespace
 }
 
-func (this *PodMap) ListByNs(ns string) []*corev1.Pod {
+func (this *PodMapStruct) ListByNs(ns string) []*corev1.Pod {
 	if list, ok := this.data.Load(ns); ok {
 		return list.([]*corev1.Pod)
 	}
 	return nil
 }
-func (this *PodMap) Get(ns string, podName string) *corev1.Pod {
+func (this *PodMapStruct) Get(ns string, podName string) *corev1.Pod {
 	if list, ok := this.data.Load(ns); ok {
 		for _, pod := range list.([]*corev1.Pod) {
 			if pod.Name == podName {
@@ -28,7 +28,7 @@ func (this *PodMap) Get(ns string, podName string) *corev1.Pod {
 	}
 	return nil
 }
-func (this *PodMap) Add(pod *corev1.Pod) {
+func (this *PodMapStruct) Add(pod *corev1.Pod) {
 	if list, ok := this.data.Load(pod.Namespace); ok {
 		list = append(list.([]*corev1.Pod), pod)
 		this.data.Store(pod.Namespace, list)
@@ -36,7 +36,7 @@ func (this *PodMap) Add(pod *corev1.Pod) {
 		this.data.Store(pod.Namespace, []*corev1.Pod{pod})
 	}
 }
-func (this *PodMap) Update(pod *corev1.Pod) error {
+func (this *PodMapStruct) Update(pod *corev1.Pod) error {
 	if list, ok := this.data.Load(pod.Namespace); ok {
 		for i, range_pod := range list.([]*corev1.Pod) {
 			if range_pod.Name == pod.Name {
@@ -47,7 +47,7 @@ func (this *PodMap) Update(pod *corev1.Pod) error {
 	}
 	return fmt.Errorf("Pod-%s not found", pod.Name)
 }
-func (this *PodMap) Delete(pod *corev1.Pod) {
+func (this *PodMapStruct) Delete(pod *corev1.Pod) {
 	if list, ok := this.data.Load(pod.Namespace); ok {
 		for i, range_pod := range list.([]*corev1.Pod) {
 			if range_pod.Name == pod.Name {
@@ -60,7 +60,7 @@ func (this *PodMap) Delete(pod *corev1.Pod) {
 }
 
 //根据标签获取 POD列表
-func (this *PodMap) ListByLabels(ns string, labels []map[string]string) ([]*corev1.Pod, error) {
+func (this *PodMapStruct) ListByLabels(ns string, labels []map[string]string) ([]*corev1.Pod, error) {
 	ret := make([]*corev1.Pod, 0)
 	if list, ok := this.data.Load(ns); ok {
 		for _, pod := range list.([]*corev1.Pod) {
@@ -74,7 +74,7 @@ func (this *PodMap) ListByLabels(ns string, labels []map[string]string) ([]*core
 	}
 	return nil, fmt.Errorf("pods not found ")
 }
-func (this *PodMap) DEBUG_ListByNS(ns string) []*corev1.Pod {
+func (this *PodMapStruct) DEBUG_ListByNS(ns string) []*corev1.Pod {
 	ret := make([]*corev1.Pod, 0)
 	if list, ok := this.data.Load(ns); ok {
 		for _, pod := range list.([]*corev1.Pod) {

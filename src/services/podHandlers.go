@@ -7,7 +7,7 @@ import (
 
 //处理deployment 回调的handler
 type PodHandler struct {
-	PodMap *PodMap `inject:"-"`
+	PodMap *PodMapStruct `inject:"-"`
 }
 
 func (this *PodHandler) OnAdd(obj interface{}) {
