@@ -17,7 +17,10 @@ func NewDeploymentCtl() *DeploymentCtl {
 }
 func (this *DeploymentCtl) GetList(c *gin.Context) goft.Json {
 	ns := c.DefaultQuery("ns", "default")
-	return this.DepService.ListAll(ns)
+	return gin.H{
+		"code": 20000,
+		"data": this.DepService.ListAll(ns),
+	}
 
 }
 func (this *DeploymentCtl) Build(goft *goft.Goft) {
