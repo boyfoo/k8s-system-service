@@ -14,3 +14,7 @@ src/.idea/*
 src/demo01/myhook
 /istio/*
 /istio
+/build
+/build/*
+/dist
+/dist/*

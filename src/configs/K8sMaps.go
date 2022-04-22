@@ -2,7 +2,7 @@ package configs
 
 import (
 	"k8s.io/client-go/kubernetes"
-	"k8sapi/src/core"
+	"k8sapi/src/services"
 )
 
 type K8sMaps struct {
@@ -14,10 +14,10 @@ func NewK8sMaps() *K8sMaps {
 }
 
 //初始化 deploymentmap
-func (this *K8sMaps) InitDepMap() *core.DeploymentMap {
-	return &core.DeploymentMap{}
+func (this *K8sMaps) InitDepMap() *services.DeploymentMap {
+	return &services.DeploymentMap{}
 }
 
-func (this *K8sMaps) InitPodMap() *core.PodMap {
-	return &core.PodMap{}
+func (this *K8sMaps) InitPodMap() *services.PodMap {
+	return &services.PodMap{}
 }

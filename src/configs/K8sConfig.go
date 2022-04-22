@@ -5,14 +5,14 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8sapi/src/core"
+	"k8sapi/src/services"
 	"log"
 	"os/user"
 )
 
 type K8sConfig struct {
-	DepHandler *core.DepHandler `inject:"-"`
-	PodHandler *core.PodHandler `inject:"-"`
+	DepHandler *services.DepHandler `inject:"-"`
+	PodHandler *services.PodHandler `inject:"-"`
 }
 
 func NewK8sConfig() *K8sConfig {

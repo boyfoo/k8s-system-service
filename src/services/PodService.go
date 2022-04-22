@@ -1,12 +1,8 @@
 package services
 
-import (
-	"k8sapi/src/core"
-)
-
 //@Service
 type PodService struct {
-	PodMap *core.PodMap   `inject:"-"`
+	PodMap *PodMap        `inject:"-"`
 	Common *CommonService `inject:"-"`
 }
 
