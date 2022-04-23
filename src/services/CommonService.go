@@ -23,27 +23,21 @@ func (*CommonService) GetImagesByPod(containers []corev1.Container) string {
 	}
 	return images
 }
-
-// pod 是否准备好
-func (c *CommonService) PodIsReady(pod *corev1.Pod) bool {
-	// pod阶段值
-	if pod.Status.Phase != corev1.PodRunning {
+func (*CommonService) PosIsReady(pod *corev1.Pod) bool {
+	if pod.Status.Phase != "Running" {
 		return false
 	}
-	// 是否已经被调度到podScheduled    pod中容器是否准备就绪containerReady    所有init容器已启动initialized   POD可以提供服务Ready
 	for _, condition := range pod.Status.Conditions {
-		if condition.Status != corev1.ConditionTrue {
+		if condition.Status != "True" {
 			return false
 		}
 	}
-
-	for _, gate := range pod.Spec.ReadinessGates {
+	for _, rg := range pod.Spec.ReadinessGates {
 		for _, condition := range pod.Status.Conditions {
-			if condition.Type == gate.ConditionType && condition.Status != corev1.ConditionTrue {
+			if condition.Type == rg.ConditionType && condition.Status != "True" {
 				return false
 			}
 		}
 	}
-
 	return true
 }

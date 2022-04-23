@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/shenyisyn/goft-gin/goft"
 	"k8s.io/api/apps/v1"
+
 	"k8sapi/src/models"
 )
 
@@ -15,8 +16,6 @@ type DeploymentService struct {
 func NewDeploymentService() *DeploymentService {
 	return &DeploymentService{}
 }
-
-// 调度信息
 func (*DeploymentService) getDeploymentCondition(dep *v1.Deployment) string {
 	for _, item := range dep.Status.Conditions {
 		if string(item.Type) == "Available" && string(item.Status) != "True" {
@@ -25,8 +24,6 @@ func (*DeploymentService) getDeploymentCondition(dep *v1.Deployment) string {
 	}
 	return ""
 }
-
-//是否完成
 func (*DeploymentService) getDeploymentIsComplete(dep *v1.Deployment) bool {
 	return dep.Status.Replicas == dep.Status.AvailableReplicas
 }
@@ -44,6 +41,5 @@ func (this *DeploymentService) ListAll(namespace string) (ret []*models.Deployme
 			CreateTime: item.CreationTimestamp.Format("2006-01-02 15:04:05"),
 		})
 	}
-
 	return
 }

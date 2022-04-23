@@ -2,7 +2,6 @@ package wscore
 
 import (
 	"github.com/gorilla/websocket"
-	"sync"
 	"time"
 )
 
@@ -10,7 +9,6 @@ type WsClient struct {
 	conn      *websocket.Conn
 	readChan  chan *WsMessage //读队列 (chan)
 	closeChan chan byte       // 失败队列
-	Locker    sync.Mutex      //加锁 。目前ws不支持并发写
 }
 
 func NewWsClient(conn *websocket.Conn) *WsClient {
@@ -19,16 +17,11 @@ func NewWsClient(conn *websocket.Conn) *WsClient {
 func (this *WsClient) Ping(waittime time.Duration) {
 	for {
 		time.Sleep(waittime)
-		func() {
-			this.Locker.Lock()
-			defer this.Locker.Unlock()
-			err := this.conn.WriteMessage(websocket.TextMessage, []byte("ping"))
-			if err != nil {
-				ClientMap.Remove(this.conn)
-				return
-			}
-		}()
-
+		err := this.conn.WriteMessage(websocket.TextMessage, []byte("ping"))
+		if err != nil {
+			ClientMap.Remove(this.conn)
+			return
+		}
 	}
 }
 func (this *WsClient) ReadLoop() {

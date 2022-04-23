@@ -27,3 +27,8 @@ func (this *K8sMaps) InitPodMap() *services.PodMapStruct {
 func (this *K8sMaps) InitNsMap() *services.NsMapStruct {
 	return &services.NsMapStruct{}
 }
+
+//初始化 eventmap
+func (this *K8sMaps) InitEventMap() *services.EventMapStruct {
+	return &services.EventMapStruct{}
+}

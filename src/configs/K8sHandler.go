@@ -23,3 +23,8 @@ func (this *K8sHandler) PodHandlers() *services.PodHandler {
 func (this *K8sHandler) NsHandlers() *services.NsHandler {
 	return &services.NsHandler{}
 }
+
+// event handler
+func (this *K8sHandler) EventHandlers() *services.EventHandler {
+	return &services.EventHandler{}
+}
