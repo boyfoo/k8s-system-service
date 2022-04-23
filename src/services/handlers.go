@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8sapi/src/wscore"
@@ -16,41 +17,82 @@ type DepHandler struct {
 
 func (this *DepHandler) OnAdd(obj interface{}) {
 	this.DepMap.Add(obj.(*v1.Deployment))
-	wscore.ClientMap.SendAllDepList(this.DepService.ListAll(obj.(*v1.Deployment).Namespace))
+	ns := obj.(*v1.Deployment).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type":   "deployments",
+			"result": gin.H{"ns": ns, "data": this.DepService.ListAll(ns)},
+		},
+	)
 }
 func (this *DepHandler) OnUpdate(oldObj, newObj interface{}) {
 	err := this.DepMap.Update(newObj.(*v1.Deployment))
 	if err != nil {
 		log.Println(err)
 	} else {
-		wscore.ClientMap.SendAllDepList(this.DepService.ListAll(newObj.(*v1.Deployment).Namespace))
+		ns := newObj.(*v1.Deployment).Namespace
+		wscore.ClientMap.SendAll(
+			gin.H{
+				"type":   "deployments",
+				"result": gin.H{"ns": ns, "data": this.DepService.ListAll(ns)},
+			},
+		)
 	}
 }
 func (this *DepHandler) OnDelete(obj interface{}) {
 	if d, ok := obj.(*v1.Deployment); ok {
 		this.DepMap.Delete(d)
-		wscore.ClientMap.SendAllDepList(this.DepService.ListAll(obj.(*v1.Deployment).Namespace))
-
+		ns := obj.(*v1.Deployment).Namespace
+		wscore.ClientMap.SendAll(
+			gin.H{
+				"type":   "deployments",
+				"result": gin.H{"ns": ns, "data": this.DepService.ListAll(ns)},
+			},
+		)
 	}
 }
 
 // pod相关的回调handler
 type PodHandler struct {
-	PodMap *PodMapStruct `inject:"-"`
+	PodMap     *PodMapStruct `inject:"-"`
+	PodService *PodService   `inject:"-"`
 }
 
 func (this *PodHandler) OnAdd(obj interface{}) {
 	this.PodMap.Add(obj.(*corev1.Pod))
+	ns := obj.(*corev1.Pod).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type":   "pods",
+			"result": gin.H{"ns": ns, "data": this.PodService.ListByNs(ns)},
+		},
+	)
+
 }
 func (this *PodHandler) OnUpdate(oldObj, newObj interface{}) {
 	err := this.PodMap.Update(newObj.(*corev1.Pod))
 	if err != nil {
 		log.Println(err)
+	} else {
+		ns := newObj.(*corev1.Pod).Namespace
+		wscore.ClientMap.SendAll(
+			gin.H{
+				"type":   "pods",
+				"result": gin.H{"ns": ns, "data": this.PodService.ListByNs(ns)},
+			},
+		)
 	}
 }
 func (this *PodHandler) OnDelete(obj interface{}) {
 	if d, ok := obj.(*corev1.Pod); ok {
 		this.PodMap.Delete(d)
+		ns := obj.(*corev1.Pod).Namespace
+		wscore.ClientMap.SendAll(
+			gin.H{
+				"type":   "pods",
+				"result": gin.H{"ns": ns, "data": this.PodService.ListByNs(ns)},
+			},
+		)
 	}
 }
 
