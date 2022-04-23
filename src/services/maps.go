@@ -6,8 +6,38 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8sapi/src/models"
 	"reflect"
+	"sort"
 	"sync"
 )
+
+type MapItems []*MapItem
+type MapItem struct {
+	key   string
+	value interface{}
+}
+
+func (this *MapItem) String() string {
+	return this.key
+}
+
+//把sync.map  转为 自定义切片
+func convertToMapItems(m sync.Map) MapItems {
+	items := make(MapItems, 0)
+	m.Range(func(key, value interface{}) bool {
+		items = append(items, &MapItem{key: key.(string), value: value})
+		return true
+	})
+	return items
+}
+func (this MapItems) Len() int {
+	return len(this)
+}
+func (this MapItems) Less(i, j int) bool {
+	return this[i].key < this[j].key
+}
+func (this MapItems) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
 
 //对deployments的集合进行定义
 type DeploymentMap struct {
@@ -67,6 +97,19 @@ func (this *DeploymentMap) GetDeployment(ns string, depname string) (*v1.Deploym
 	return nil, fmt.Errorf("record not found")
 }
 
+type CoreV1Pods []*corev1.Pod
+
+func (this CoreV1Pods) Len() int {
+	return len(this)
+}
+func (this CoreV1Pods) Less(i, j int) bool {
+	//根据时间排序    正排序
+	return this[i].CreationTimestamp.Time.Before(this[j].CreationTimestamp.Time)
+}
+func (this CoreV1Pods) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
+
 // 保存Pod集合
 type PodMapStruct struct {
 	data sync.Map // [key string] []*v1.Pod    key=>namespace
@@ -74,7 +117,9 @@ type PodMapStruct struct {
 
 func (this *PodMapStruct) ListByNs(ns string) []*corev1.Pod {
 	if list, ok := this.data.Load(ns); ok {
-		return list.([]*corev1.Pod)
+		ret := list.([]*corev1.Pod)
+		sort.Sort(CoreV1Pods(ret)) //排序
+		return ret
 	}
 	return nil
 }
@@ -168,11 +213,18 @@ func (this *NsMapStruct) Delete(ns *corev1.Namespace) {
 
 //显示所有的 namespace
 func (this *NsMapStruct) ListAll() []*models.NsModel {
-	ret := make([]*models.NsModel, 0)
-	this.data.Range(func(key, value interface{}) bool {
-		ret = append(ret, &models.NsModel{Name: key.(string)})
-		return true
-	})
+
+	//this.data.Range(func(key, value interface{}) bool {
+	//ret=append(ret,&models.NsModel{Name:key.(string)})
+	//	return true
+	//})
+	items := convertToMapItems(this.data)
+	sort.Sort(items)
+	ret := make([]*models.NsModel, len(items))
+	for index, item := range items {
+		ret[index] = &models.NsModel{Name: item.key}
+	}
+
 	return ret
 }
 

@@ -1,17 +1,42 @@
 package services
 
-import "k8sapi/src/models"
+import (
+	"github.com/gin-gonic/gin"
+	"k8sapi/src/models"
+)
 
 //@Service
 type PodService struct {
 	PodMap   *PodMapStruct   `inject:"-"`
 	Common   *CommonService  `inject:"-"`
 	EventMap *EventMapStruct `inject:"-"`
+	Helper   *Helper         `inject:"-"`
 }
 
 func NewPodService() *PodService {
 	return &PodService{}
 }
+
+//分页PODS的输出
+func (this *PodService) PagePods(ns string, page, size int) *ItemsPage {
+	pods := this.ListByNs(ns).([]*models.Pod)
+	readyCount := 0 //就绪的pod数量
+	allCount := 0   //总数量
+	ipods := make([]interface{}, len(pods))
+	for i, pod := range pods {
+		allCount++
+		ipods[i] = pod
+		if pod.IsReady {
+			readyCount++
+		}
+	}
+	return this.Helper.PageResource(
+		page,
+		size,
+		ipods).SetExt(gin.H{"ReadyNum": readyCount, "AllNum": allCount})
+}
+
+//不分页， 显示全部
 func (this *PodService) ListByNs(ns string) interface{} {
 	podList := this.PodMap.ListByNs(ns)
 	ret := make([]*models.Pod, 0)

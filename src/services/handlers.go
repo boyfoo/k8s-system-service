@@ -62,9 +62,11 @@ func (this *PodHandler) OnAdd(obj interface{}) {
 	this.PodMap.Add(obj.(*corev1.Pod))
 	ns := obj.(*corev1.Pod).Namespace
 	wscore.ClientMap.SendAll(
+
 		gin.H{
-			"type":   "pods",
-			"result": gin.H{"ns": ns, "data": this.PodService.ListByNs(ns)},
+			"type": "pods",
+			"result": gin.H{"ns": ns,
+				"data": this.PodService.PagePods(ns, 1, 5)},
 		},
 	)
 
@@ -77,8 +79,9 @@ func (this *PodHandler) OnUpdate(oldObj, newObj interface{}) {
 		ns := newObj.(*corev1.Pod).Namespace
 		wscore.ClientMap.SendAll(
 			gin.H{
-				"type":   "pods",
-				"result": gin.H{"ns": ns, "data": this.PodService.ListByNs(ns)},
+				"type": "pods",
+				"result": gin.H{"ns": ns,
+					"data": this.PodService.PagePods(ns, 1, 5)},
 			},
 		)
 	}
@@ -89,8 +92,9 @@ func (this *PodHandler) OnDelete(obj interface{}) {
 		ns := obj.(*corev1.Pod).Namespace
 		wscore.ClientMap.SendAll(
 			gin.H{
-				"type":   "pods",
-				"result": gin.H{"ns": ns, "data": this.PodService.ListByNs(ns)},
+				"type": "pods",
+				"result": gin.H{"ns": ns,
+					"data": this.PodService.PagePods(ns, 1, 5)},
 			},
 		)
 	}
