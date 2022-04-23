@@ -1,0 +1,16 @@
+--- # 指定需要被服务发现的Deployment
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: my-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: pp.jtthink.com
+      http:
+        paths:
+          - backend:
+              serviceName: nginx-service-01
+              servicePort: 80
