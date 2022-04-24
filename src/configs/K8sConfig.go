@@ -61,10 +61,10 @@ func (*K8sConfig) InitClient() *kubernetes.Clientset {
 //初始化Informer
 func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 	fact := informers.NewSharedInformerFactory(this.InitClient(), 0)
-
+	//
 	depInformer := fact.Apps().V1().Deployments()
 	depInformer.Informer().AddEventHandler(this.DepHandler)
-
+	//
 	podInformer := fact.Core().V1().Pods() //监听pod
 	podInformer.Informer().AddEventHandler(this.PodHandler)
 
@@ -73,10 +73,10 @@ func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 
 	eventInformer := fact.Core().V1().Events() //监听event
 	eventInformer.Informer().AddEventHandler(this.EventHandler)
-
+	//
 	IngressInformer := fact.Networking().V1beta1().Ingresses() //监听Ingress
 	IngressInformer.Informer().AddEventHandler(this.IngressHandler)
-
+	//
 	fact.Start(wait.NeverStop)
 
 	return fact
