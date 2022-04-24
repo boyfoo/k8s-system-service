@@ -40,6 +40,7 @@ func main() {
 			controllers.NewNsCtl(),
 			controllers.NewIngressCtl(),
 			controllers.NewSvcCtl(),
+			controllers.NewSecretCtl(),
 		).
 		Attach(
 		//middlewares.NewCrosMiddleware(),//跨域中间件

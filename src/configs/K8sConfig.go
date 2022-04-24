@@ -18,6 +18,7 @@ type K8sConfig struct {
 	EventHandler   *services.EventHandler   `inject:"-"`
 	IngressHandler *services.IngressHandler `inject:"-"`
 	ServiceHandler *services.ServiceHandler `inject:"-"`
+	SecretHandler  *services.SecretHandler  `inject:"-"`
 }
 
 func NewK8sConfig() *K8sConfig {
@@ -62,26 +63,28 @@ func (*K8sConfig) InitClient() *kubernetes.Clientset {
 //初始化Informer
 func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 	fact := informers.NewSharedInformerFactory(this.InitClient(), 0)
-	//
+
 	depInformer := fact.Apps().V1().Deployments()
 	depInformer.Informer().AddEventHandler(this.DepHandler)
-	//
+
 	podInformer := fact.Core().V1().Pods() //监听pod
 	podInformer.Informer().AddEventHandler(this.PodHandler)
+
+	serviceInformer := fact.Core().V1().Services() //监听service
+	serviceInformer.Informer().AddEventHandler(this.ServiceHandler)
 
 	nsInformer := fact.Core().V1().Namespaces() //监听namespace
 	nsInformer.Informer().AddEventHandler(this.NsHandler)
 
-	serviceInformer := fact.Core().V1().Services() //监听s/**/ervice
-	serviceInformer.Informer().AddEventHandler(this.ServiceHandler)
-
 	eventInformer := fact.Core().V1().Events() //监听event
 	eventInformer.Informer().AddEventHandler(this.EventHandler)
-	//
+
 	IngressInformer := fact.Networking().V1beta1().Ingresses() //监听Ingress
 	IngressInformer.Informer().AddEventHandler(this.IngressHandler)
-	//
-	fact.Start(wait.NeverStop)
 
+	SecretInformer := fact.Core().V1().Secrets() //监听Secret
+	SecretInformer.Informer().AddEventHandler(this.SecretHandler)
+
+	fact.Start(wait.NeverStop)
 	return fact
 }

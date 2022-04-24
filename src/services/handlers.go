@@ -230,3 +230,47 @@ func (this *ServiceHandler) OnDelete(obj interface{}) {
 		},
 	)
 }
+
+//Secret相关的handler
+type SecretHandler struct {
+	SecretMap     *SecretMapStruct `inject:"-"`
+	SecretService *SecretService   `inject:"-"`
+}
+
+func (this *SecretHandler) OnAdd(obj interface{}) {
+	this.SecretMap.Add(obj.(*corev1.Secret))
+	ns := obj.(*corev1.Secret).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "secret",
+			"result": gin.H{"ns": ns,
+				"data": this.SecretService.ListSecret(ns)},
+		},
+	)
+}
+func (this *SecretHandler) OnUpdate(oldObj, newObj interface{}) {
+	err := this.SecretMap.Update(newObj.(*corev1.Secret))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	ns := newObj.(*corev1.Secret).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "secret",
+			"result": gin.H{"ns": ns,
+				"data": this.SecretService.ListSecret(ns)},
+		},
+	)
+}
+func (this *SecretHandler) OnDelete(obj interface{}) {
+	this.SecretMap.Delete(obj.(*corev1.Secret))
+	ns := obj.(*corev1.Secret).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "secret",
+			"result": gin.H{"ns": ns,
+				"data": this.SecretService.ListSecret(ns)},
+		},
+	)
+}

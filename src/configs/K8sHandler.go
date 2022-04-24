@@ -38,3 +38,8 @@ func (this *K8sHandler) IngressHandler() *services.IngressHandler {
 func (this *K8sHandler) ServiceHandler() *services.ServiceHandler {
 	return &services.ServiceHandler{}
 }
+
+// SecretHandler
+func (this *K8sHandler) SecretHandler() *services.SecretHandler {
+	return &services.SecretHandler{}
+}
