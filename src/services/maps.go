@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/api/networking/v1beta1"
 	"k8sapi/src/models"
 	"reflect"
 	"sort"
@@ -241,4 +242,79 @@ func (this *EventMapStruct) GetMessage(ns string, kind string, name string) stri
 		return v.(*corev1.Event).Message
 	}
 	return ""
+}
+
+type V1Beta1Ingress []*v1beta1.Ingress
+
+func (this V1Beta1Ingress) Len() int {
+	return len(this)
+}
+func (this V1Beta1Ingress) Less(i, j int) bool {
+	//根据时间排序    倒排序
+	return this[i].CreationTimestamp.Time.After(this[j].CreationTimestamp.Time)
+}
+func (this V1Beta1Ingress) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
+
+type IngressMapStruct struct {
+	data sync.Map // [ns string] []*v1beta1.Ingress
+}
+
+//获取单个Ingress
+func (this *IngressMapStruct) Get(ns string, name string) *v1beta1.Ingress {
+	if items, ok := this.data.Load(ns); ok {
+		for _, item := range items.([]*v1beta1.Ingress) {
+			if item.Name == name {
+				return item
+			}
+		}
+	}
+	return nil
+}
+func (this *IngressMapStruct) Add(ingress *v1beta1.Ingress) {
+	if list, ok := this.data.Load(ingress.Namespace); ok {
+		list = append(list.([]*v1beta1.Ingress), ingress)
+		this.data.Store(ingress.Namespace, list)
+	} else {
+		this.data.Store(ingress.Namespace, []*v1beta1.Ingress{ingress})
+	}
+}
+func (this *IngressMapStruct) Update(ingress *v1beta1.Ingress) error {
+	if list, ok := this.data.Load(ingress.Namespace); ok {
+		for i, range_pod := range list.([]*v1beta1.Ingress) {
+			if range_pod.Name == ingress.Name {
+				list.([]*v1beta1.Ingress)[i] = ingress
+			}
+		}
+		return nil
+	}
+	return fmt.Errorf("ingress-%s not found", ingress.Name)
+}
+func (this *IngressMapStruct) Delete(ingress *v1beta1.Ingress) {
+	if list, ok := this.data.Load(ingress.Namespace); ok {
+		for i, range_ingress := range list.([]*v1beta1.Ingress) {
+			if range_ingress.Name == ingress.Name {
+				newList := append(list.([]*v1beta1.Ingress)[:i], list.([]*v1beta1.Ingress)[i+1:]...)
+				this.data.Store(ingress.Namespace, newList)
+				break
+			}
+		}
+	}
+}
+func (this *IngressMapStruct) ListAll(ns string) []*models.IngressModel {
+	if list, ok := this.data.Load(ns); ok {
+		newList := list.([]*v1beta1.Ingress)
+		sort.Sort(V1Beta1Ingress(newList)) //  按时间倒排序
+		ret := make([]*models.IngressModel, len(newList))
+		for i, item := range newList {
+			ret[i] = &models.IngressModel{
+				Name:       item.Name,
+				CreateTime: item.CreationTimestamp.Format("2006-01-02 15:04:05"),
+				NameSpace:  item.Namespace,
+			}
+		}
+		return ret
+	}
+	return []*models.IngressModel{} //返回空列表
 }

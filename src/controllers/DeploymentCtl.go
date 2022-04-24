@@ -16,7 +16,7 @@ func NewDeploymentCtl() *DeploymentCtl {
 	return &DeploymentCtl{}
 }
 func (this *DeploymentCtl) GetList(c *gin.Context) goft.Json {
-	ns := c.DefaultQuery("ns", "default")
+	ns := c.DefaultQuery("ns", "default") // GET /deployments?ns=xxx
 	return gin.H{
 		"code": 20000,
 		"data": this.DepService.ListAll(ns),

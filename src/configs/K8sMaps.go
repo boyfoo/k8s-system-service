@@ -32,3 +32,8 @@ func (this *K8sMaps) InitNsMap() *services.NsMapStruct {
 func (this *K8sMaps) InitEventMap() *services.EventMapStruct {
 	return &services.EventMapStruct{}
 }
+
+//初始化 ingress map
+func (this *K8sMaps) InitIngressMap() *services.IngressMapStruct {
+	return &services.IngressMapStruct{}
+}

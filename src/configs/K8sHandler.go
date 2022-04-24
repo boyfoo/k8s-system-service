@@ -28,3 +28,8 @@ func (this *K8sHandler) NsHandlers() *services.NsHandler {
 func (this *K8sHandler) EventHandlers() *services.EventHandler {
 	return &services.EventHandler{}
 }
+
+// IngressHandler
+func (this *K8sHandler) IngressHandler() *services.IngressHandler {
+	return &services.IngressHandler{}
+}

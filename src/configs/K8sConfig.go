@@ -12,10 +12,11 @@ import (
 )
 
 type K8sConfig struct {
-	DepHandler   *services.DepHandler   `inject:"-"`
-	PodHandler   *services.PodHandler   `inject:"-"`
-	NsHandler    *services.NsHandler    `inject:"-"`
-	EventHandler *services.EventHandler `inject:"-"`
+	DepHandler     *services.DepHandler     `inject:"-"`
+	PodHandler     *services.PodHandler     `inject:"-"`
+	NsHandler      *services.NsHandler      `inject:"-"`
+	EventHandler   *services.EventHandler   `inject:"-"`
+	IngressHandler *services.IngressHandler `inject:"-"`
 }
 
 func NewK8sConfig() *K8sConfig {
@@ -72,6 +73,10 @@ func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 
 	eventInformer := fact.Core().V1().Events() //监听event
 	eventInformer.Informer().AddEventHandler(this.EventHandler)
+
+	IngressInformer := fact.Networking().V1beta1().Ingresses() //监听Ingress
+	IngressInformer.Informer().AddEventHandler(this.IngressHandler)
+
 	fact.Start(wait.NeverStop)
 
 	return fact

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/api/networking/v1beta1"
 	"k8sapi/src/wscore"
 	"log"
 )
@@ -62,7 +63,6 @@ func (this *PodHandler) OnAdd(obj interface{}) {
 	this.PodMap.Add(obj.(*corev1.Pod))
 	ns := obj.(*corev1.Pod).Namespace
 	wscore.ClientMap.SendAll(
-
 		gin.H{
 			"type": "pods",
 			"result": gin.H{"ns": ns,
@@ -141,4 +141,48 @@ func (this *EventHandler) OnUpdate(oldObj, newObj interface{}) {
 }
 func (this *EventHandler) OnDelete(obj interface{}) {
 	this.storeData(obj, true)
+}
+
+// ingress相关handler
+type IngressHandler struct {
+	IngressMap *IngressMapStruct `inject:"-"`
+}
+
+func (this *IngressHandler) OnAdd(obj interface{}) {
+	this.IngressMap.Add(obj.(*v1beta1.Ingress))
+	ns := obj.(*v1beta1.Ingress).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "ingress",
+			"result": gin.H{"ns": ns,
+				"data": this.IngressMap.ListAll(ns)},
+		},
+	)
+}
+func (this *IngressHandler) OnUpdate(oldObj, newObj interface{}) {
+	err := this.IngressMap.Update(newObj.(*v1beta1.Ingress))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	ns := newObj.(*v1beta1.Ingress).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "ingress",
+			"result": gin.H{"ns": ns,
+				"data": this.IngressMap.ListAll(ns)},
+		},
+	)
+
+}
+func (this *IngressHandler) OnDelete(obj interface{}) {
+	this.IngressMap.Delete(obj.(*v1beta1.Ingress))
+	ns := obj.(*v1beta1.Ingress).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "ingress",
+			"result": gin.H{"ns": ns,
+				"data": this.IngressMap.ListAll(ns)},
+		},
+	)
 }

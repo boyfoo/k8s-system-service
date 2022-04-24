@@ -7,11 +7,15 @@ import (
 	"log"
 )
 
-type WsCtl struct {
+//@Controller
+type WsCtl struct{}
+
+func NewWsCtl() *WsCtl {
+	return &WsCtl{}
 }
 
-func (w *WsCtl) Connect(c *gin.Context) (v goft.Void) {
-	client, err := wscore.Upgrader.Upgrade(c.Writer, c.Request, nil)
+func (this *WsCtl) Connect(c *gin.Context) (v goft.Void) {
+	client, err := wscore.Upgrader.Upgrade(c.Writer, c.Request, nil) //升级
 	if err != nil {
 		log.Println(err)
 		return
@@ -19,16 +23,11 @@ func (w *WsCtl) Connect(c *gin.Context) (v goft.Void) {
 		wscore.ClientMap.Store(client)
 		return
 	}
-}
 
-func NewWsCtl() *WsCtl {
-	return &WsCtl{}
 }
-
 func (this *WsCtl) Build(goft *goft.Goft) {
-	//路由
 	goft.Handle("GET", "/ws", this.Connect)
 }
-func (*WsCtl) Name() string {
+func (this *WsCtl) Name() string {
 	return "WsCtl"
 }

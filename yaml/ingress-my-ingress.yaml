@@ -8,7 +8,7 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-    - host: pp.jtthink.com
+    - host: prod.jtthink.com
       http:
         paths:
           - backend:
