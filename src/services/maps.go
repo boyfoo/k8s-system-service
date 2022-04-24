@@ -302,21 +302,14 @@ func (this *IngressMapStruct) Delete(ingress *v1beta1.Ingress) {
 		}
 	}
 }
-func (this *IngressMapStruct) ListAll(ns string) []*models.IngressModel {
+func (this *IngressMapStruct) ListAll(ns string) []*v1beta1.Ingress {
 	if list, ok := this.data.Load(ns); ok {
 		newList := list.([]*v1beta1.Ingress)
 		sort.Sort(V1Beta1Ingress(newList)) //  按时间倒排序
-		ret := make([]*models.IngressModel, len(newList))
-		for i, item := range newList {
-			ret[i] = &models.IngressModel{
-				Name:       item.Name,
-				CreateTime: item.CreationTimestamp.Format("2006-01-02 15:04:05"),
-				NameSpace:  item.Namespace,
-			}
-		}
-		return ret
+		return newList
+		//之前获取列表代码是写在这的，现在移动到了 IngressService中
 	}
-	return []*models.IngressModel{} //返回空列表
+	return []*v1beta1.Ingress{} //返回空列表
 }
 
 type ServiceMapStruct struct {

@@ -145,7 +145,8 @@ func (this *EventHandler) OnDelete(obj interface{}) {
 
 // ingress相关handler
 type IngressHandler struct {
-	IngressMap *IngressMapStruct `inject:"-"`
+	IngressMap     *IngressMapStruct `inject:"-"`
+	IngressService *IngressService   `inject:"-"`
 }
 
 func (this *IngressHandler) OnAdd(obj interface{}) {
@@ -155,7 +156,7 @@ func (this *IngressHandler) OnAdd(obj interface{}) {
 		gin.H{
 			"type": "ingress",
 			"result": gin.H{"ns": ns,
-				"data": this.IngressMap.ListAll(ns)},
+				"data": this.IngressService.ListIngress(ns)},
 		},
 	)
 }
@@ -170,7 +171,7 @@ func (this *IngressHandler) OnUpdate(oldObj, newObj interface{}) {
 		gin.H{
 			"type": "ingress",
 			"result": gin.H{"ns": ns,
-				"data": this.IngressMap.ListAll(ns)},
+				"data": this.IngressService.ListIngress(ns)},
 		},
 	)
 
@@ -182,7 +183,7 @@ func (this *IngressHandler) OnDelete(obj interface{}) {
 		gin.H{
 			"type": "ingress",
 			"result": gin.H{"ns": ns,
-				"data": this.IngressMap.ListAll(ns)},
+				"data": this.IngressService.ListIngress(ns)},
 		},
 	)
 }
