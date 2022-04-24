@@ -186,3 +186,46 @@ func (this *IngressHandler) OnDelete(obj interface{}) {
 		},
 	)
 }
+
+// Service 相关handler
+type ServiceHandler struct {
+	SvcMap *ServiceMapStruct `inject:"-"`
+}
+
+func (this *ServiceHandler) OnAdd(obj interface{}) {
+	this.SvcMap.Add(obj.(*corev1.Service))
+	ns := obj.(*corev1.Service).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "service",
+			"result": gin.H{"ns": ns,
+				"data": this.SvcMap.ListAll(ns)},
+		},
+	)
+}
+func (this *ServiceHandler) OnUpdate(oldObj, newObj interface{}) {
+	err := this.SvcMap.Update(newObj.(*corev1.Service))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	ns := newObj.(*corev1.Service).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "service",
+			"result": gin.H{"ns": ns,
+				"data": this.SvcMap.ListAll(ns)},
+		},
+	)
+}
+func (this *ServiceHandler) OnDelete(obj interface{}) {
+	this.SvcMap.Delete(obj.(*corev1.Service))
+	ns := obj.(*corev1.Service).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "service",
+			"result": gin.H{"ns": ns,
+				"data": this.SvcMap.ListAll(ns)},
+		},
+	)
+}

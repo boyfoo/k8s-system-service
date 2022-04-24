@@ -17,6 +17,7 @@ type K8sConfig struct {
 	NsHandler      *services.NsHandler      `inject:"-"`
 	EventHandler   *services.EventHandler   `inject:"-"`
 	IngressHandler *services.IngressHandler `inject:"-"`
+	ServiceHandler *services.ServiceHandler `inject:"-"`
 }
 
 func NewK8sConfig() *K8sConfig {
@@ -70,6 +71,9 @@ func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 
 	nsInformer := fact.Core().V1().Namespaces() //监听namespace
 	nsInformer.Informer().AddEventHandler(this.NsHandler)
+
+	serviceInformer := fact.Core().V1().Services() //监听s/**/ervice
+	serviceInformer.Informer().AddEventHandler(this.ServiceHandler)
 
 	eventInformer := fact.Core().V1().Events() //监听event
 	eventInformer.Informer().AddEventHandler(this.EventHandler)
