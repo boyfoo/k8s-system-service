@@ -15,12 +15,14 @@ func init() {
 	}
 }
 
+//列表用
 type SecretModel struct {
 	Name       string
 	NameSpace  string
 	CreateTime string
-	Type       string //类型
-	Data       map[string][]byte
+	Type       string            //类型
+	Data       map[string][]byte // KV
+	ExtData    interface{}       // 额外数据
 }
 
 //提交 用的

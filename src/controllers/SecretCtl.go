@@ -58,6 +58,7 @@ func (this *SecretCtl) Detail(c *gin.Context) goft.Json {
 			Type:       string(secret.Type),
 			CreateTime: secret.CreationTimestamp.Format("2006-01-02 15:04:05"),
 			Data:       secret.Data,
+			ExtData:    this.SecretService.ParseIfTLS(secret.Type, secret.Data),
 		},
 	}
 }

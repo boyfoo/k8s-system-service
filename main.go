@@ -5,7 +5,6 @@ import (
 	"github.com/shenyisyn/goft-gin/goft"
 	"k8sapi/src/configs"
 	"k8sapi/src/controllers"
-
 	"net/http"
 )
 
@@ -41,13 +40,15 @@ func main() {
 			controllers.NewIngressCtl(),
 			controllers.NewSvcCtl(),
 			controllers.NewSecretCtl(),
+			controllers.NewConfigMapCtl(),
 		).
 		Attach(
 		//middlewares.NewCrosMiddleware(),//跨域中间件
 		)
+	//server.GET("/admin/*filepath", func(c *gin.Context) {
+	//  http.FileServer(FS(false)).ServeHTTP(c.Writer,c.Request)
+	//})
 
-	// 前端页面直接访问
-	//server.Static("/dashboard", "./dist")
-	//server.Static("/static", "./dist/static")
 	server.Launch()
+
 }

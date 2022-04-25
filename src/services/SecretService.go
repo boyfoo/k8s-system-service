@@ -1,7 +1,9 @@
 package services
 
 import (
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8sapi/src/helpers"
 	"k8sapi/src/models"
 )
 
@@ -29,4 +31,16 @@ func (this *SecretService) ListSecret(ns string) []*models.SecretModel {
 		}
 	}
 	return ret
+}
+
+func (this *SecretService) ParseIfTLS(t v1.SecretType, data map[string][]byte) interface{} {
+	if t == v1.SecretTypeTLS {
+		if crt, ok := data["tls.crt"]; ok {
+			crtModel := helpers.ParseCert(crt)
+			if crtModel != nil {
+				return crtModel
+			}
+		}
+	}
+	return struct{}{}
 }

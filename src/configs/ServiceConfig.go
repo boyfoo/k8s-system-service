@@ -26,3 +26,6 @@ func (*ServiceConfig) IngressService() *services.IngressService {
 func (*ServiceConfig) SecretService() *services.SecretService {
 	return services.NewSecretService()
 }
+func (*ServiceConfig) ConfigMapService() *services.ConfigMapService {
+	return services.NewConfigMapService()
+}
