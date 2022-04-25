@@ -17,6 +17,19 @@ func NewPodService() *PodService {
 	return &PodService{}
 }
 
+func (p *PodService) GetPodContainer(ns, podname string) []*models.ContainerModel {
+	ret := make([]*models.ContainerModel, 0)
+	pod := p.PodMap.Get(ns, podname)
+	if pod != nil {
+		for _, container := range pod.Spec.Containers {
+			ret = append(ret, &models.ContainerModel{
+				Name: container.Name,
+			})
+		}
+	}
+	return ret
+}
+
 //分页PODS的输出
 func (this *PodService) PagePods(ns string, page, size int) *ItemsPage {
 	pods := this.ListByNs(ns).([]*models.Pod)

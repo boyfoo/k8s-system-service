@@ -14,6 +14,16 @@ type PodCtl struct {
 func NewPodCtl() *PodCtl {
 	return &PodCtl{}
 }
+
+func (this *PodCtl) Containers(c *gin.Context) goft.Json {
+	ns := c.DefaultQuery("ns", "default")
+	podname := c.DefaultQuery("name", "")
+	return gin.H{
+		"code": 20000,
+		"data": this.PodService.GetPodContainer(ns, podname),
+	}
+}
+
 func (this *PodCtl) GetAll(c *gin.Context) goft.Json {
 	ns := c.DefaultQuery("ns", "default")
 	page := c.DefaultQuery("current", "1") //当前页
@@ -46,6 +56,7 @@ func (this *PodCtl) GetAll(c *gin.Context) goft.Json {
 }
 func (this *PodCtl) Build(goft *goft.Goft) {
 	goft.Handle("GET", "/pods", this.GetAll)
+	goft.Handle("GET", "/pods/containers", this.Containers)
 }
 func (*PodCtl) Name() string {
 	return "PodCtl"
