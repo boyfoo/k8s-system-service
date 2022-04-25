@@ -42,6 +42,25 @@ func (this *SecretCtl) ListAll(c *gin.Context) goft.Json {
 		"data": this.SecretService.ListSecret(ns), //暂时 不分页
 	}
 }
+func (this *SecretCtl) Detail(c *gin.Context) goft.Json {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	if ns == "" || name == "" {
+		panic("err param:ns or name")
+	}
+	secret, err := this.Client.CoreV1().Secrets(ns).Get(c, name, v1.GetOptions{})
+	goft.Error(err)
+	return gin.H{
+		"code": 20000,
+		"data": &models.SecretModel{
+			Name:       secret.Name,
+			NameSpace:  secret.Namespace,
+			Type:       string(secret.Type),
+			CreateTime: secret.CreationTimestamp.Format("2006-01-02 15:04:05"),
+			Data:       secret.Data,
+		},
+	}
+}
 func (this *SecretCtl) PostSecret(c *gin.Context) goft.Json {
 	postModel := &models.PostSecretModel{}
 	err := c.ShouldBindJSON(postModel)
@@ -63,6 +82,7 @@ func (this *SecretCtl) PostSecret(c *gin.Context) goft.Json {
 
 func (this *SecretCtl) Build(goft *goft.Goft) {
 	goft.Handle("GET", "/secrets", this.ListAll)
+	goft.Handle("GET", "/secrets/:ns/:name", this.Detail)
 	goft.Handle("DELETE", "/secrets", this.RmSecret)
 	goft.Handle("POST", "/secrets", this.PostSecret)
 }

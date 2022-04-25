@@ -20,6 +20,7 @@ type SecretModel struct {
 	NameSpace  string
 	CreateTime string
 	Type       string //类型
+	Data       map[string][]byte
 }
 
 //提交 用的
