@@ -27,7 +27,15 @@ func NewK8sConfig() *K8sConfig {
 }
 
 //初始化客户端
-func (*K8sConfig) InitClient() *kubernetes.Clientset {
+func (k *K8sConfig) InitClient() *kubernetes.Clientset {
+	c, err := kubernetes.NewForConfig(k.InitConfig())
+	if err != nil {
+		log.Fatal(err)
+	}
+	return c
+}
+
+func (*K8sConfig) InitConfig() *rest.Config {
 	currentUser, err := user.Current()
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -54,11 +62,8 @@ func (*K8sConfig) InitClient() *kubernetes.Clientset {
 			},
 		}
 	}
-	c, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return c
+
+	return config
 }
 
 //初始化Informer
