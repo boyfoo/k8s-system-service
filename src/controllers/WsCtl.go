@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shenyisyn/goft-gin/goft"
 	"k8s.io/client-go/kubernetes"
@@ -37,9 +38,7 @@ func (this *WsCtl) PodConnect(c *gin.Context) (v goft.Void) {
 	pod := c.Query("pod")
 	container := c.Query("c")
 	wsClient, err := wscore.Upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		return
-	}
+	goft.Error(err)
 	shellClient := wscore.NewWsShellClient(wsClient)
 	err = helpers.HandleCommand(ns, pod, container, this.Client, this.Config, []string{"sh"}).
 		Stream(remotecommand.StreamOptions{
@@ -50,9 +49,29 @@ func (this *WsCtl) PodConnect(c *gin.Context) (v goft.Void) {
 		})
 	return
 }
+
+func (this *WsCtl) NodeConnect(c *gin.Context) (v goft.Void) {
+	wsClient, err := wscore.Upgrader.Upgrade(c.Writer, c.Request, nil)
+	goft.Error(err)
+	shellClient := wscore.NewWsShellClient(wsClient)
+	session, err := helpers.SSHConnect(helpers.TempSSHUser, helpers.TempSSHPWD, helpers.TempSSHIP, 22)
+	fmt.Println(err)
+	goft.Error(err)
+	defer session.Close()
+	session.Stdout = shellClient
+	session.Stderr = shellClient
+	session.Stdin = shellClient
+	err = session.RequestPty("xterm-256color", 300, 500, helpers.NodeShellModes)
+	goft.Error(err)
+
+	err = session.Run("sh")
+	goft.Error(err)
+	return
+}
 func (this *WsCtl) Build(goft *goft.Goft) {
 	goft.Handle("GET", "/ws", this.Connect)
 	goft.Handle("GET", "/podws", this.PodConnect)
+	goft.Handle("GET", "/nodews", this.NodeConnect)
 }
 func (this *WsCtl) Name() string {
 	return "WsCtl"

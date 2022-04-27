@@ -542,3 +542,35 @@ func (this *ConfigMapStruct) ListAll(ns string) []*corev1.ConfigMap {
 	}
 	return ret //返回空列表
 }
+
+//node map
+type NodeMapStruct struct {
+	data sync.Map // [nodename string] *v1.Node   注意里面不是切片
+}
+
+func (this *NodeMapStruct) Get(name string) *corev1.Node {
+	if node, ok := this.data.Load(name); ok {
+		return node.(*corev1.Node)
+	}
+	return nil
+}
+func (this *NodeMapStruct) Add(item *corev1.Node) {
+	//直接覆盖
+	this.data.Store(item.Name, item)
+}
+
+func (this *NodeMapStruct) Update(item *corev1.Node) bool {
+	this.data.Store(item.Name, item)
+	return true
+}
+func (this *NodeMapStruct) Delete(node *corev1.Node) {
+	this.data.Delete(node.Name)
+}
+func (this *NodeMapStruct) ListAll() []*corev1.Node {
+	ret := []*corev1.Node{}
+	this.data.Range(func(key, value interface{}) bool {
+		ret = append(ret, value.(*corev1.Node))
+		return true
+	})
+	return ret //返回空列表
+}

@@ -52,3 +52,8 @@ func (this *K8sMaps) InitSecretMap() *services.SecretMapStruct {
 func (this *K8sMaps) InitConfigMap() *services.ConfigMapStruct {
 	return &services.ConfigMapStruct{}
 }
+
+//初始化NodeMap
+func (this *K8sMaps) InitNodeMap() *services.NodeMapStruct {
+	return &services.NodeMapStruct{}
+}

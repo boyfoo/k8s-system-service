@@ -5,10 +5,9 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"os/user"
-
 	"k8sapi/src/services"
 	"log"
+	"os/user"
 )
 
 type K8sConfig struct {
@@ -20,13 +19,21 @@ type K8sConfig struct {
 	ServiceHandler   *services.ServiceHandler   `inject:"-"`
 	SecretHandler    *services.SecretHandler    `inject:"-"`
 	ConfigMapHandler *services.ConfigMapHandler `inject:"-"`
+	NodeHandler      *services.NodeMapHandler   `inject:"-"`
 }
 
 func NewK8sConfig() *K8sConfig {
 	return &K8sConfig{}
 }
 
-//初始化客户端
+//func(*K8sConfig) K8sRestConfig() *rest.Config{
+//	config, err := clientcmd.BuildConfigFromFlags("","config" )
+//	config.Insecure=true
+//	if err!=nil{
+//		log.Fatal(err)
+//	}
+//	return config
+//}
 func (k *K8sConfig) InitClient() *kubernetes.Clientset {
 	c, err := kubernetes.NewForConfig(k.InitConfig())
 	if err != nil {
@@ -93,6 +100,9 @@ func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 
 	ConfigMapInformer := fact.Core().V1().ConfigMaps() //监听Configmap
 	ConfigMapInformer.Informer().AddEventHandler(this.ConfigMapHandler)
+
+	NodeInformer := fact.Core().V1().Nodes()
+	NodeInformer.Informer().AddEventHandler(this.NodeHandler)
 
 	fact.Start(wait.NeverStop)
 	return fact

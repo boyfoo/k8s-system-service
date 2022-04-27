@@ -42,6 +42,7 @@ func main() {
 			controllers.NewSecretCtl(),
 			controllers.NewConfigMapCtl(),
 			controllers.NewPodLogsCtl(),
+			controllers.NewNodeCtl(),
 		).
 		Attach(
 		//middlewares.NewCrosMiddleware(),//跨域中间件

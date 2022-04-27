@@ -29,3 +29,7 @@ func (*ServiceConfig) SecretService() *services.SecretService {
 func (*ServiceConfig) ConfigMapService() *services.ConfigMapService {
 	return services.NewConfigMapService()
 }
+
+func (*ServiceConfig) ConfigNodeService() *services.NodeService {
+	return services.NewNodeService()
+}
