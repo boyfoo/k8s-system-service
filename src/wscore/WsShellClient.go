@@ -1,7 +1,6 @@
 package wscore
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 )
 
@@ -12,18 +11,22 @@ type WsShellClient struct {
 func NewWsShellClient(client *websocket.Conn) *WsShellClient {
 	return &WsShellClient{client: client}
 }
+
 func (this *WsShellClient) Write(p []byte) (n int, err error) {
-	err = this.client.WriteMessage(websocket.TextMessage, p)
+	//这里做了改动
+	err = this.client.WriteMessage(websocket.TextMessage,
+		p)
 	if err != nil {
 		return 0, err
 	}
 	return len(p), nil
 }
 func (this *WsShellClient) Read(p []byte) (n int, err error) {
-	fmt.Println("ws接受到消息")
+
 	_, b, err := this.client.ReadMessage()
+
 	if err != nil {
 		return 0, err
 	}
-	return copy(p, string(b)+"\n"), nil
+	return copy(p, string(b)), nil
 }

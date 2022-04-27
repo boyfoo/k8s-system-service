@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shenyisyn/goft-gin/goft"
 	"k8s.io/client-go/kubernetes"
@@ -34,22 +33,21 @@ func (this *WsCtl) Connect(c *gin.Context) (v goft.Void) {
 	}
 }
 func (this *WsCtl) PodConnect(c *gin.Context) (v goft.Void) {
+	ns := c.Query("ns")
+	pod := c.Query("pod")
+	container := c.Query("c")
 	wsClient, err := wscore.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		return
 	}
-	fmt.Println("创建pod wsshell 链接")
 	shellClient := wscore.NewWsShellClient(wsClient)
-	err = helpers.HandleCommand(this.Client, this.Config, []string{"sh"}).
+	err = helpers.HandleCommand(ns, pod, container, this.Client, this.Config, []string{"sh"}).
 		Stream(remotecommand.StreamOptions{
 			Stdin:  shellClient,
 			Stdout: shellClient,
 			Stderr: shellClient,
 			Tty:    true,
 		})
-	if err != nil {
-		fmt.Println(err)
-	}
 	return
 }
 func (this *WsCtl) Build(goft *goft.Goft) {
