@@ -117,6 +117,19 @@ type PodMapStruct struct {
 	data sync.Map // [key string] []*v1.Pod    key=>namespace
 }
 
+//根据节点名称 获取pods数量
+func (this *PodMapStruct) GetNum(nodeName string) (num int) {
+	this.data.Range(func(key, value interface{}) bool {
+		list := value.([]*corev1.Pod)
+		for _, pod := range list {
+			if pod.Spec.NodeName == nodeName {
+				num++
+			}
+		}
+		return true
+	})
+	return
+}
 func (this *PodMapStruct) ListByNs(ns string) []*corev1.Pod {
 	if list, ok := this.data.Load(ns); ok {
 		ret := list.([]*corev1.Pod)
@@ -125,6 +138,7 @@ func (this *PodMapStruct) ListByNs(ns string) []*corev1.Pod {
 	}
 	return nil
 }
+
 func (this *PodMapStruct) Get(ns string, podName string) *corev1.Pod {
 	if list, ok := this.data.Load(ns); ok {
 		for _, pod := range list.([]*corev1.Pod) {
