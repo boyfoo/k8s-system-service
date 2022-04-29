@@ -8,14 +8,16 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8sapi/src/helpers"
+	"k8sapi/src/models"
 	"k8sapi/src/wscore"
 	"log"
 )
 
 //@Controller
 type WsCtl struct {
-	Client *kubernetes.Clientset `inject:"-"`
-	Config *rest.Config          `inject:"-"`
+	Client    *kubernetes.Clientset `inject:"-"`
+	Config    *rest.Config          `inject:"-"`
+	SysConfig *models.SysConfig     `inject:"-"`
 }
 
 func NewWsCtl() *WsCtl {
@@ -51,10 +53,13 @@ func (this *WsCtl) PodConnect(c *gin.Context) (v goft.Void) {
 }
 
 func (this *WsCtl) NodeConnect(c *gin.Context) (v goft.Void) {
+	nodeName := c.Query("node")
+	nodeConfig := helpers.GetNodeConfig(this.SysConfig, nodeName) //读取配置文件
 	wsClient, err := wscore.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	goft.Error(err)
 	shellClient := wscore.NewWsShellClient(wsClient)
-	session, err := helpers.SSHConnect(helpers.TempSSHUser, helpers.TempSSHPWD, helpers.TempSSHIP, 22)
+	//session, err := helpers.SSHConnect(helpers.TempSSHUser,  helpers.TempSSHPWD, helpers.TempSSHIP ,22 )
+	session, err := helpers.SSHConnect(nodeConfig.User, nodeConfig.Pass, nodeConfig.Ip, 22)
 	fmt.Println(err)
 	goft.Error(err)
 	defer session.Close()

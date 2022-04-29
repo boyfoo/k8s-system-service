@@ -6,6 +6,7 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/metrics/pkg/client/clientset/versioned"
+	"k8sapi/src/models"
 	"regexp"
 )
 
@@ -40,4 +41,14 @@ func FilterLables(labels map[string]string) (ret []string) {
 		}
 	}
 	return
+}
+
+//获取节点配置
+func GetNodeConfig(c *models.SysConfig, nodeName string) *models.NodesConfig {
+	for _, node := range c.K8s.Nodes {
+		if node.Name == nodeName {
+			return node
+		}
+	}
+	panic("no such node")
 }
