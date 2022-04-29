@@ -5,6 +5,7 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/metrics/pkg/client/clientset/versioned"
 	"k8sapi/src/services"
 	"log"
 	"os/user"
@@ -25,15 +26,11 @@ type K8sConfig struct {
 func NewK8sConfig() *K8sConfig {
 	return &K8sConfig{}
 }
+func (k *K8sConfig) K8sRestConfig() *rest.Config {
+	return k.InitConfig()
+}
 
-//func(*K8sConfig) K8sRestConfig() *rest.Config{
-//	config, err := clientcmd.BuildConfigFromFlags("","config" )
-//	config.Insecure=true
-//	if err!=nil{
-//		log.Fatal(err)
-//	}
-//	return config
-//}
+//初始化client-go客户端
 func (k *K8sConfig) InitClient() *kubernetes.Clientset {
 	c, err := kubernetes.NewForConfig(k.InitConfig())
 	if err != nil {
@@ -71,6 +68,16 @@ func (*K8sConfig) InitConfig() *rest.Config {
 	}
 
 	return config
+}
+
+// metric客户端
+func (this *K8sConfig) InitMetricClient() *versioned.Clientset {
+
+	c, err := versioned.NewForConfig(this.K8sRestConfig())
+	if err != nil {
+		log.Fatal(err)
+	}
+	return c
 }
 
 //初始化Informer
