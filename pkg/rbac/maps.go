@@ -72,3 +72,69 @@ func (this *RoleMapStruct) ListAll(ns string) []*v1.Role {
 	}
 	return []*v1.Role{} //返回空列表
 }
+
+type V1RoleBinding []*v1.RoleBinding
+
+func (this V1RoleBinding) Len() int {
+	return len(this)
+}
+func (this V1RoleBinding) Less(i, j int) bool {
+	//根据时间排序    倒排序
+	return this[i].CreationTimestamp.Time.After(this[j].CreationTimestamp.Time)
+}
+func (this V1RoleBinding) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
+
+type RoleBindingMapStruct struct {
+	data sync.Map // [ns string] []*v1.RoleBinding
+}
+
+func (this *RoleBindingMapStruct) Get(ns string, name string) *v1.RoleBinding {
+	if items, ok := this.data.Load(ns); ok {
+		for _, item := range items.([]*v1.RoleBinding) {
+			if item.Name == name {
+				return item
+			}
+		}
+	}
+	return nil
+}
+func (this *RoleBindingMapStruct) Add(item *v1.RoleBinding) {
+	if list, ok := this.data.Load(item.Namespace); ok {
+		list = append(list.([]*v1.RoleBinding), item)
+		this.data.Store(item.Namespace, list)
+	} else {
+		this.data.Store(item.Namespace, []*v1.RoleBinding{item})
+	}
+}
+func (this *RoleBindingMapStruct) Update(item *v1.RoleBinding) error {
+	if list, ok := this.data.Load(item.Namespace); ok {
+		for i, range_item := range list.([]*v1.RoleBinding) {
+			if range_item.Name == item.Name {
+				list.([]*v1.RoleBinding)[i] = item
+			}
+		}
+		return nil
+	}
+	return fmt.Errorf("Role-%s not found", item.Name)
+}
+func (this *RoleBindingMapStruct) Delete(svc *v1.RoleBinding) {
+	if list, ok := this.data.Load(svc.Namespace); ok {
+		for i, range_item := range list.([]*v1.RoleBinding) {
+			if range_item.Name == svc.Name {
+				newList := append(list.([]*v1.RoleBinding)[:i], list.([]*v1.RoleBinding)[i+1:]...)
+				this.data.Store(svc.Namespace, newList)
+				break
+			}
+		}
+	}
+}
+func (this *RoleBindingMapStruct) ListAll(ns string) []*v1.RoleBinding {
+	if list, ok := this.data.Load(ns); ok {
+		newList := list.([]*v1.RoleBinding)
+		sort.Sort(V1RoleBinding(newList)) //  按时间倒排序
+		return newList
+	}
+	return []*v1.RoleBinding{} //返回空列表
+}

@@ -61,3 +61,8 @@ func (this *K8sHandler) ConfigNodeHandler() *services.NodeMapHandler {
 func (this *K8sHandler) ConfigRoleHandler() *rbac.RoleHander {
 	return &rbac.RoleHander{}
 }
+
+// RoleBindingHandler
+func (this *K8sHandler) ConfigRoleBindingHandler() *rbac.RoleBindingHander {
+	return &rbac.RoleBindingHander{}
+}

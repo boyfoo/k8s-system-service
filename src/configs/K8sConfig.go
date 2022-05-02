@@ -12,16 +12,17 @@ import (
 )
 
 type K8sConfig struct {
-	DepHandler       *services.DepHandler       `inject:"-"`
-	PodHandler       *services.PodHandler       `inject:"-"`
-	NsHandler        *services.NsHandler        `inject:"-"`
-	EventHandler     *services.EventHandler     `inject:"-"`
-	IngressHandler   *services.IngressHandler   `inject:"-"`
-	ServiceHandler   *services.ServiceHandler   `inject:"-"`
-	SecretHandler    *services.SecretHandler    `inject:"-"`
-	ConfigMapHandler *services.ConfigMapHandler `inject:"-"`
-	NodeHandler      *services.NodeMapHandler   `inject:"-"`
-	RoleHander       *rbac.RoleHander           `inject:"-"`
+	DepHandler        *services.DepHandler       `inject:"-"`
+	PodHandler        *services.PodHandler       `inject:"-"`
+	NsHandler         *services.NsHandler        `inject:"-"`
+	EventHandler      *services.EventHandler     `inject:"-"`
+	IngressHandler    *services.IngressHandler   `inject:"-"`
+	ServiceHandler    *services.ServiceHandler   `inject:"-"`
+	SecretHandler     *services.SecretHandler    `inject:"-"`
+	ConfigMapHandler  *services.ConfigMapHandler `inject:"-"`
+	NodeHandler       *services.NodeMapHandler   `inject:"-"`
+	RoleHander        *rbac.RoleHander           `inject:"-"`
+	RoleBindingHander *rbac.RoleBindingHander    `inject:"-"`
 }
 
 func NewK8sConfig() *K8sConfig {
@@ -41,15 +42,6 @@ func (*K8sConfig) InitSysConfig() *models.SysConfig {
 	}
 	return config
 }
-
-//func(*K8sConfig) K8sRestConfig() *rest.Config{
-//	config, err := clientcmd.BuildConfigFromFlags("","config" )
-//	config.Insecure=true
-//	if err!=nil{
-//		log.Fatal(err)
-//	}
-//	return config
-//}
 
 //初始化Informer
 func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
@@ -84,6 +76,9 @@ func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 
 	RolesInformer := fact.Rbac().V1().Roles()
 	RolesInformer.Informer().AddEventHandler(this.RoleHander)
+
+	RolesBindingInformer := fact.Rbac().V1().RoleBindings()
+	RolesBindingInformer.Informer().AddEventHandler(this.RoleBindingHander)
 
 	fact.Start(wait.NeverStop)
 	return fact

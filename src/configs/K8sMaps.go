@@ -63,3 +63,8 @@ func (this *K8sMaps) InitNodeMap() *services.NodeMapStruct {
 func (this *K8sMaps) InitRoleMap() *rbac.RoleMapStruct {
 	return &rbac.RoleMapStruct{}
 }
+
+//初始化RoleBindingMap
+func (this *K8sMaps) InitRoleBindingMap() *rbac.RoleBindingMapStruct {
+	return &rbac.RoleBindingMapStruct{}
+}
