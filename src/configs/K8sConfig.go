@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
+	"k8sapi/pkg/rbac"
 	"k8sapi/src/models"
 	"k8sapi/src/services"
 	"log"
@@ -20,6 +21,7 @@ type K8sConfig struct {
 	SecretHandler    *services.SecretHandler    `inject:"-"`
 	ConfigMapHandler *services.ConfigMapHandler `inject:"-"`
 	NodeHandler      *services.NodeMapHandler   `inject:"-"`
+	RoleHander       *rbac.RoleHander           `inject:"-"`
 }
 
 func NewK8sConfig() *K8sConfig {
@@ -39,6 +41,15 @@ func (*K8sConfig) InitSysConfig() *models.SysConfig {
 	}
 	return config
 }
+
+//func(*K8sConfig) K8sRestConfig() *rest.Config{
+//	config, err := clientcmd.BuildConfigFromFlags("","config" )
+//	config.Insecure=true
+//	if err!=nil{
+//		log.Fatal(err)
+//	}
+//	return config
+//}
 
 //初始化Informer
 func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
@@ -70,6 +81,9 @@ func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 
 	NodeInformer := fact.Core().V1().Nodes()
 	NodeInformer.Informer().AddEventHandler(this.NodeHandler)
+
+	RolesInformer := fact.Rbac().V1().Roles()
+	RolesInformer.Informer().AddEventHandler(this.RoleHander)
 
 	fact.Start(wait.NeverStop)
 	return fact

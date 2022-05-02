@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/shenyisyn/goft-gin/goft"
+	"k8sapi/pkg/rbac"
+	"k8sapi/pkg/resources"
 	"k8sapi/src/configs"
 	"k8sapi/src/controllers"
 	"net/http"
@@ -43,6 +45,8 @@ func main() {
 			controllers.NewConfigMapCtl(),
 			controllers.NewPodLogsCtl(),
 			controllers.NewNodeCtl(),
+			rbac.NewRBACCtl(),
+			resources.NewResourcesCtl(),
 		).
 		Attach(
 		//middlewares.NewCrosMiddleware(),//跨域中间件

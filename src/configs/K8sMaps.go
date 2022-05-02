@@ -2,6 +2,7 @@ package configs
 
 import (
 	"k8s.io/client-go/kubernetes"
+	"k8sapi/pkg/rbac"
 	"k8sapi/src/services"
 )
 
@@ -56,4 +57,9 @@ func (this *K8sMaps) InitConfigMap() *services.ConfigMapStruct {
 //初始化NodeMap
 func (this *K8sMaps) InitNodeMap() *services.NodeMapStruct {
 	return &services.NodeMapStruct{}
+}
+
+//初始化RoleMap
+func (this *K8sMaps) InitRoleMap() *rbac.RoleMapStruct {
+	return &rbac.RoleMapStruct{}
 }

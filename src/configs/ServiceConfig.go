@@ -1,6 +1,9 @@
 package configs
 
-import "k8sapi/src/services"
+import (
+	"k8sapi/pkg/rbac"
+	"k8sapi/src/services"
+)
 
 //@Config
 type ServiceConfig struct{}
@@ -32,4 +35,8 @@ func (*ServiceConfig) ConfigMapService() *services.ConfigMapService {
 
 func (*ServiceConfig) ConfigNodeService() *services.NodeService {
 	return services.NewNodeService()
+}
+
+func (*ServiceConfig) ConfigRoleService() *rbac.RoleService {
+	return rbac.NewRoleService()
 }

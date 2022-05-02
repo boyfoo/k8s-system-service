@@ -1,6 +1,9 @@
 package configs
 
-import "k8sapi/src/services"
+import (
+	"k8sapi/pkg/rbac"
+	"k8sapi/src/services"
+)
 
 //注入 回调handler
 type K8sHandler struct{}
@@ -52,4 +55,9 @@ func (this *K8sHandler) ConfigMapHandler() *services.ConfigMapHandler {
 // ConfigMapHandler
 func (this *K8sHandler) ConfigNodeHandler() *services.NodeMapHandler {
 	return &services.NodeMapHandler{}
+}
+
+// RoleHandler
+func (this *K8sHandler) ConfigRoleHandler() *rbac.RoleHander {
+	return &rbac.RoleHander{}
 }
