@@ -62,7 +62,7 @@ func (this *RoleBindingHander) OnAdd(obj interface{}) {
 		gin.H{
 			"type": "rolebinding",
 			"result": gin.H{"ns": ns,
-				"data": this.RoleService.ListRoles(ns)},
+				"data": this.RoleService.ListRoleBindings(ns)},
 		},
 	)
 }
@@ -77,18 +77,18 @@ func (this *RoleBindingHander) OnUpdate(oldObj, newObj interface{}) {
 		gin.H{
 			"type": "rolebinding",
 			"result": gin.H{"ns": ns,
-				"data": this.RoleService.ListRoles(ns)},
+				"data": this.RoleService.ListRoleBindings(ns)},
 		},
 	)
 }
 func (this *RoleBindingHander) OnDelete(obj interface{}) {
 	this.RoleBindingMap.Delete(obj.(*v1.RoleBinding))
-	ns := obj.(*v1.Role).Namespace
+	ns := obj.(*v1.RoleBinding).Namespace
 	wscore.ClientMap.SendAll(
 		gin.H{
 			"type": "rolebinding",
 			"result": gin.H{"ns": ns,
-				"data": this.RoleService.ListRoles(ns)},
+				"data": this.RoleService.ListRoleBindings(ns)},
 		},
 	)
 }

@@ -11,5 +11,6 @@ type RoleBindingModel struct {
 	Name       string
 	NameSpace  string
 	CreateTime string
+	RoleRef    v1.RoleRef
 	Subject    []v1.Subject //包含了 绑定用户 数据
 }
