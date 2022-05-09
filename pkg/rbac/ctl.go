@@ -7,7 +7,10 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/clientcmd/api"
 	"k8sapi/src/helpers"
+	"k8sapi/src/models"
 	"os"
 	"path"
 	"path/filepath"
@@ -19,6 +22,7 @@ type RBACCtl struct {
 	RoleService *RoleService          `inject:"-"`
 	SaService   *SaService            `inject:"-"`
 	Client      *kubernetes.Clientset `inject:"-"`
+	SysConfig   *models.SysConfig     `inject:"-"`
 }
 
 func NewRBACCtl() *RBACCtl {
@@ -303,6 +307,40 @@ func (this *RBACCtl) DeleteUa(c *gin.Context) goft.Json {
 	}
 
 }
+
+//生成 config文件
+func (this *RBACCtl) Clientconfig(c *gin.Context) goft.Json {
+	user := c.DefaultQuery("user", "")
+	if user == "" {
+		panic("no such user")
+	}
+	cfg := api.NewConfig()
+	clusterName := "kubernetes"
+	cfg.Clusters[clusterName] = &api.Cluster{
+		Server:                   this.SysConfig.K8s.ClusterInfo.EndPoint,
+		CertificateAuthorityData: helpers.CertData(this.SysConfig.K8s.ClusterInfo.CaFile),
+	}
+	contextName := fmt.Sprintf("%s@kubernetes", user)
+	cfg.Contexts[contextName] = &api.Context{
+		AuthInfo: user,
+		Cluster:  clusterName,
+	}
+	cfg.CurrentContext = contextName
+	userCertFile := fmt.Sprintf("%s/%s.pem", this.SysConfig.K8s.ClusterInfo.UserCert, user)
+	userCertKeyFile := fmt.Sprintf("%s/%s_key.pem", this.SysConfig.K8s.ClusterInfo.UserCert, user)
+	cfg.AuthInfos[user] = &api.AuthInfo{
+		ClientKeyData:         helpers.CertData(userCertKeyFile),
+		ClientCertificateData: helpers.CertData(userCertFile),
+	}
+	fileContent, err := clientcmd.Write(*cfg)
+	goft.Error(err)
+
+	return gin.H{
+		"code": 20000,
+		"data": string(fileContent),
+	}
+}
+
 func (*RBACCtl) Name() string {
 	return "RBACCtl"
 }
@@ -333,4 +371,7 @@ func (this *RBACCtl) Build(goft *goft.Goft) {
 	goft.Handle("GET", "/ua", this.UaList)
 	goft.Handle("POST", "/ua", this.PostUa)
 	goft.Handle("DELETE", "/ua", this.DeleteUa)
+
+	goft.Handle("GET", "/clientconfig", this.Clientconfig)
+
 }
