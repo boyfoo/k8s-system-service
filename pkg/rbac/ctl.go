@@ -7,6 +7,12 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8sapi/src/helpers"
+	"os"
+	"path"
+	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 type RBACCtl struct {
@@ -110,7 +116,6 @@ func (this *RBACCtl) UpdateRolesDetail(c *gin.Context) goft.Json {
 		"data": "success",
 	}
 }
-
 func (this *RBACCtl) RoleBindingList(c *gin.Context) goft.Json {
 	ns := c.DefaultQuery("ns", "default")
 	return gin.H{
@@ -250,6 +255,54 @@ func (this *RBACCtl) SaList(c *gin.Context) goft.Json {
 		"data": this.SaService.ListSa(ns),
 	}
 }
+
+//UserAccount 列表
+func (this *RBACCtl) UaList(c *gin.Context) goft.Json {
+	uaPath := "./k8susers" //写死的路径存储证书
+	keyReg := regexp.MustCompile(".*_key.pem")
+	users := []*UAModel{}
+	suffix := ".pem"
+	err := filepath.Walk(uaPath, func(p string, f os.FileInfo, err error) error {
+		if f.IsDir() {
+			return nil
+		}
+		if path.Ext(f.Name()) == suffix {
+			if !keyReg.MatchString(f.Name()) {
+				users = append(users, &UAModel{
+					Name:       strings.Replace(f.Name(), suffix, "", -1),
+					CreateTime: f.ModTime().Format("2006-01-02 15:04:05"),
+				})
+			}
+		}
+		return nil
+	})
+	goft.Error(err)
+	return gin.H{
+		"code": 20000,
+		"data": users,
+	}
+
+}
+func (this *RBACCtl) PostUa(c *gin.Context) goft.Json {
+	postModel := &PostUAModel{}
+	goft.Error(c.ShouldBindJSON(postModel))
+	helpers.GenK8sUser(postModel.CN, postModel.O)
+	return gin.H{
+		"code": 20000,
+		"data": "success",
+	}
+
+}
+func (this *RBACCtl) DeleteUa(c *gin.Context) goft.Json {
+	postModel := &PostUAModel{}
+	goft.Error(c.ShouldBindJSON(postModel))
+	helpers.DeleteK8sUser(postModel.CN)
+	return gin.H{
+		"code": 20000,
+		"data": "success",
+	}
+
+}
 func (*RBACCtl) Name() string {
 	return "RBACCtl"
 }
@@ -276,4 +329,8 @@ func (this *RBACCtl) Build(goft *goft.Goft) {
 	goft.Handle("DELETE", "/clusterrolebindings", this.DeleteClusterRoleBinding)
 
 	goft.Handle("GET", "/sa", this.SaList)
+
+	goft.Handle("GET", "/ua", this.UaList)
+	goft.Handle("POST", "/ua", this.PostUa)
+	goft.Handle("DELETE", "/ua", this.DeleteUa)
 }
