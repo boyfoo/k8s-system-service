@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/shenyisyn/goft-gin/goft"
+	"k8sapi/pkg/deployoments"
 	"k8sapi/pkg/rbac"
 	"k8sapi/pkg/resources"
 	"k8sapi/src/configs"
@@ -34,6 +35,7 @@ func main() {
 		configs.NewServiceConfig(), //4
 	).
 		Mount("",
+			deployoments.NewDeploymentCtlV2(),
 			controllers.NewDeploymentCtl(),
 			controllers.NewPodCtl(),
 			controllers.NewUserCtl(),
