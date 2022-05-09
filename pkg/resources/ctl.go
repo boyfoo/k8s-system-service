@@ -30,6 +30,7 @@ func (this *ResourcesCtl) ListResources(c *gin.Context) goft.Json {
 	goft.Error(err)
 	gRes := make([]*GroupResources, 0)
 	for _, r := range res {
+
 		group, version := this.GetGroupVersion(r.GroupVersion)
 		gr := &GroupResources{Group: group, Version: version, Resources: make([]*Resources, 0)}
 		for _, rr := range r.APIResources {

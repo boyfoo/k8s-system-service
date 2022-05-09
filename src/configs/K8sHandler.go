@@ -66,3 +66,18 @@ func (this *K8sHandler) ConfigRoleHandler() *rbac.RoleHander {
 func (this *K8sHandler) ConfigRoleBindingHandler() *rbac.RoleBindingHander {
 	return &rbac.RoleBindingHander{}
 }
+
+// RoleBindingHandler
+func (this *K8sHandler) ConfigSaHandler() *rbac.SaHander {
+	return &rbac.SaHander{}
+}
+
+// ClusterRoleHandler
+func (this *K8sHandler) ConfigClusterRoleHandler() *rbac.ClusterRoleHandler {
+	return &rbac.ClusterRoleHandler{}
+}
+
+// ClusterRoleBindingHandler
+func (this *K8sHandler) ConfigClusterRoleBindingHandler() *rbac.ClusterRoleBindingHander {
+	return &rbac.ClusterRoleBindingHander{}
+}

@@ -68,3 +68,18 @@ func (this *K8sMaps) InitRoleMap() *rbac.RoleMapStruct {
 func (this *K8sMaps) InitRoleBindingMap() *rbac.RoleBindingMapStruct {
 	return &rbac.RoleBindingMapStruct{}
 }
+
+//初始化RoleBindingMap
+func (this *K8sMaps) InitSaMap() *rbac.SaMapStruct {
+	return &rbac.SaMapStruct{}
+}
+
+//初始化ClusterRole
+func (this *K8sMaps) InitClusterRoleMap() *rbac.ClusterRoleMapStruct {
+	return &rbac.ClusterRoleMapStruct{}
+}
+
+//初始化ClusterRoleBinding
+func (this *K8sMaps) InitClusterRoleBindingMap() *rbac.ClusterRoleBindingMapStruct {
+	return &rbac.ClusterRoleBindingMapStruct{}
+}

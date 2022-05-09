@@ -2,6 +2,7 @@ package rbac
 
 import (
 	"github.com/gin-gonic/gin"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/rbac/v1"
 	"k8sapi/src/wscore"
 	"log"
@@ -89,6 +90,127 @@ func (this *RoleBindingHander) OnDelete(obj interface{}) {
 			"type": "rolebinding",
 			"result": gin.H{"ns": ns,
 				"data": this.RoleService.ListRoleBindings(ns)},
+		},
+	)
+}
+
+type ClusterRoleBindingHander struct {
+	ClusterRoleBindingMap *ClusterRoleBindingMapStruct `inject:"-"`
+	RoleService           *RoleService                 `inject:"-"`
+}
+
+func (this *ClusterRoleBindingHander) OnAdd(obj interface{}) {
+	this.ClusterRoleBindingMap.Add(obj.(*v1.ClusterRoleBinding))
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "clusterrolebinding",
+			"result": gin.H{"ns": "clusterrolebinding",
+				"data": this.RoleService.ListClusterRoleBindings()},
+		},
+	)
+}
+func (this *ClusterRoleBindingHander) OnUpdate(oldObj, newObj interface{}) {
+	err := this.ClusterRoleBindingMap.Update(newObj.(*v1.ClusterRoleBinding))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "clusterrolebinding",
+			"result": gin.H{"ns": "clusterrolebinding",
+				"data": this.RoleService.ListClusterRoleBindings()},
+		},
+	)
+}
+func (this *ClusterRoleBindingHander) OnDelete(obj interface{}) {
+	this.ClusterRoleBindingMap.Delete(obj.(*v1.ClusterRoleBinding))
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "clusterrolebinding",
+			"result": gin.H{"ns": "clusterrolebinding",
+				"data": this.RoleService.ListClusterRoleBindings()},
+		},
+	)
+}
+
+type SaHander struct {
+	SaMap     *SaMapStruct `inject:"-"`
+	SaService *SaService   `inject:"-"`
+}
+
+func (this *SaHander) OnAdd(obj interface{}) {
+	this.SaMap.Add(obj.(*corev1.ServiceAccount))
+	ns := obj.(*corev1.ServiceAccount).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "sa",
+			"result": gin.H{"ns": ns,
+				"data": this.SaService.ListSa(ns)},
+		},
+	)
+}
+func (this *SaHander) OnUpdate(oldObj, newObj interface{}) {
+	err := this.SaMap.Update(newObj.(*corev1.ServiceAccount))
+	if err != nil {
+		return
+	}
+	ns := newObj.(*corev1.ServiceAccount).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "sa",
+			"result": gin.H{"ns": ns,
+				"data": this.SaService.ListSa(ns)},
+		},
+	)
+}
+func (this *SaHander) OnDelete(obj interface{}) {
+	this.SaMap.Delete(obj.(*corev1.ServiceAccount))
+	ns := obj.(*corev1.ServiceAccount).Namespace
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "sa",
+			"result": gin.H{"ns": ns,
+				"data": this.SaService.ListSa(ns)},
+		},
+	)
+}
+
+type ClusterRoleHandler struct {
+	ClusterRoleMap *ClusterRoleMapStruct `inject:"-"`
+	RoleService    *RoleService          `inject:"-"`
+}
+
+func (this *ClusterRoleHandler) OnAdd(obj interface{}) {
+	this.ClusterRoleMap.Add(obj.(*v1.ClusterRole))
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "clusterrole",
+			"result": gin.H{"ns": "clusterrole",
+				"data": this.RoleService.ListClusterRoles()},
+		},
+	)
+}
+func (this *ClusterRoleHandler) OnUpdate(oldObj, newObj interface{}) {
+	err := this.ClusterRoleMap.Update(newObj.(*v1.ClusterRole))
+	if err != nil {
+		return
+	}
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "clusterrole",
+			"result": gin.H{"ns": "clusterrole",
+				"data": this.RoleService.ListClusterRoles()},
+		},
+	)
+}
+func (this *ClusterRoleHandler) OnDelete(obj interface{}) {
+	this.ClusterRoleMap.Delete(obj.(*v1.ClusterRole))
+	wscore.ClientMap.SendAll(
+		gin.H{
+			"type": "clusterrole",
+			"result": gin.H{"ns": "clusterrole",
+				"data": this.RoleService.ListClusterRoles()},
 		},
 	)
 }
