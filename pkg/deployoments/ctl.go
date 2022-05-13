@@ -1,10 +1,11 @@
 package deployoments
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shenyisyn/goft-gin/goft"
 	"k8s.io/api/apps/v1"
-	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8sapi/src/services"
 )
@@ -17,21 +18,43 @@ type DeploymentCtlV2 struct {
 func NewDeploymentCtlV2() *DeploymentCtlV2 {
 	return &DeploymentCtlV2{}
 }
+
+//快捷创建时  需要 初始化一些 标签
+func (this *DeploymentCtlV2) initLabel(deploy *v1.Deployment) {
+	if deploy.Spec.Selector == nil {
+		deploy.Spec.Selector = &metav1.LabelSelector{MatchLabels: map[string]string{"jtapp": deploy.Name}}
+	}
+	if deploy.Spec.Selector.MatchLabels == nil {
+		deploy.Spec.Selector.MatchLabels = map[string]string{"jtapp": deploy.Name}
+	}
+	if deploy.Spec.Template.ObjectMeta.Labels == nil {
+		deploy.Spec.Template.ObjectMeta.Labels = map[string]string{"jtapp": deploy.Name}
+	}
+	deploy.Spec.Selector.MatchLabels["jtapp"] = deploy.Name
+
+	deploy.Spec.Template.ObjectMeta.Labels["jtapp"] = deploy.Name
+}
 func (this *DeploymentCtlV2) SaveDeployment(c *gin.Context) goft.Json {
 	dep := &v1.Deployment{}
 	goft.Error(c.ShouldBindJSON(dep))
-	_, err := this.K8sClient.AppsV1().Deployments(dep.Namespace).Create(c, dep, v12.CreateOptions{})
+	if c.Query("fast") != "" { //代表是快捷创建 。 要预定义一些值
+		this.initLabel(dep)
+	}
+	fmt.Println(dep.Spec.Template.ObjectMeta.Labels)
+	fmt.Println(dep.Spec.Selector)
+	_, err := this.K8sClient.AppsV1().Deployments(dep.Namespace).Create(c, dep, metav1.CreateOptions{})
 	goft.Error(err)
 	return gin.H{
 		"code": 20000,
 		"data": "success",
 	}
 }
+
 func (this *DeploymentCtlV2) RmDeployment(c *gin.Context) goft.Json {
 	ns := c.Param("ns")
 	name := c.Param("name")
 
-	err := this.K8sClient.AppsV1().Deployments(ns).Delete(c, name, v12.DeleteOptions{})
+	err := this.K8sClient.AppsV1().Deployments(ns).Delete(c, name, metav1.DeleteOptions{})
 	goft.Error(err)
 	return gin.H{
 		"code": 20000,
