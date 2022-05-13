@@ -34,8 +34,11 @@ func parseK8sCA(CAFile, CAKey string) (*x509.Certificate, *rsa.PrivateKey) {
 	return caCert, caPriKey
 }
 
-const CAFILE = "./test/certs/ca.crt"
-const CAKEY = "./test/certs/ca.key"
+//const CAFILE = "./test/certs/ca.crt"
+//const CAKEY = "./test/certs/ca.key"
+
+const CAFILE = "./test/certs/ca.pem"
+const CAKEY = "./test/certs/ca-key.pem"
 
 func DeleteK8sUser(cn string) {
 	err := os.Remove(fmt.Sprintf("./k8susers/%s.pem", cn))
@@ -89,7 +92,7 @@ func GenK8sUser(cn, o string) {
 
 	buf := x509.MarshalPKCS1PrivateKey(priKey)
 	keyPem := &pem.Block{
-		Type:  "PRIVATE KEY",
+		Type:  "RSA PRIVATE KEY",
 		Bytes: buf,
 	}
 	clientKeyFile, _ := os.OpenFile(fmt.Sprintf("./k8susers/%s_key.pem", cn), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
