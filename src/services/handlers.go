@@ -53,6 +53,25 @@ func (this *DepHandler) OnDelete(obj interface{}) {
 	}
 }
 
+type RsHandler struct {
+	RsMap *RsMapStruct `inject:"-"`
+}
+
+func (this *RsHandler) OnAdd(obj interface{}) {
+	this.RsMap.Add(obj.(*v1.ReplicaSet))
+}
+func (this *RsHandler) OnUpdate(oldObj, newObj interface{}) {
+	err := this.RsMap.Update(newObj.(*v1.ReplicaSet))
+	if err != nil {
+		log.Println(err)
+	}
+}
+func (this *RsHandler) OnDelete(obj interface{}) {
+	if d, ok := obj.(*v1.ReplicaSet); ok {
+		this.RsMap.Delete(d)
+	}
+}
+
 // pod相关的回调handler
 type PodHandler struct {
 	PodMap     *PodMapStruct `inject:"-"`

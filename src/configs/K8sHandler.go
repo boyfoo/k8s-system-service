@@ -81,3 +81,8 @@ func (this *K8sHandler) ConfigClusterRoleHandler() *rbac.ClusterRoleHandler {
 func (this *K8sHandler) ConfigClusterRoleBindingHandler() *rbac.ClusterRoleBindingHander {
 	return &rbac.ClusterRoleBindingHander{}
 }
+
+// RShandler
+func (this *K8sHandler) ConfigRsHandler() *services.RsHandler {
+	return &services.RsHandler{}
+}

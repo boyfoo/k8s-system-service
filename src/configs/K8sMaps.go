@@ -83,3 +83,8 @@ func (this *K8sMaps) InitClusterRoleMap() *rbac.ClusterRoleMapStruct {
 func (this *K8sMaps) InitClusterRoleBindingMap() *rbac.ClusterRoleBindingMapStruct {
 	return &rbac.ClusterRoleBindingMapStruct{}
 }
+
+//初始化 ReplicaSetMap
+func (this *K8sMaps) InitRsMap() *services.RsMapStruct {
+	return &services.RsMapStruct{}
+}

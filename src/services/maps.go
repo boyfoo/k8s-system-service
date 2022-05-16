@@ -7,7 +7,6 @@ import (
 	"k8s.io/api/networking/v1beta1"
 	"k8sapi/src/helpers"
 	"k8sapi/src/models"
-	"reflect"
 	"sort"
 	"sync"
 )
@@ -38,6 +37,19 @@ func (this MapItems) Less(i, j int) bool {
 	return this[i].key < this[j].key
 }
 func (this MapItems) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
+
+type V1Deployment []*v1.Deployment
+
+func (this V1Deployment) Len() int {
+	return len(this)
+}
+func (this V1Deployment) Less(i, j int) bool {
+	//根据时间排序    倒排序
+	return this[i].CreationTimestamp.Time.After(this[j].CreationTimestamp.Time)
+}
+func (this V1Deployment) Swap(i, j int) {
 	this[i], this[j] = this[j], this[i]
 }
 
@@ -84,7 +96,9 @@ func (this *DeploymentMap) Delete(dep *v1.Deployment) {
 }
 func (this *DeploymentMap) ListByNS(ns string) ([]*v1.Deployment, error) {
 	if list, ok := this.data.Load(ns); ok {
-		return list.([]*v1.Deployment), nil
+		getList := V1Deployment(list.([]*v1.Deployment))
+		sort.Sort(getList)
+		return getList, nil
 	}
 	return nil, fmt.Errorf("record not found")
 }
@@ -97,6 +111,50 @@ func (this *DeploymentMap) GetDeployment(ns string, depname string) (*v1.Deploym
 		}
 	}
 	return nil, fmt.Errorf("record not found")
+}
+
+// ReplicaSet 集合
+type RsMapStruct struct {
+	data sync.Map // [key string] []*appv1.ReplicaSet    key=>namespace
+}
+
+func (this *RsMapStruct) Add(rs *v1.ReplicaSet) {
+	if list, ok := this.data.Load(rs.Namespace); ok {
+		list = append(list.([]*v1.ReplicaSet), rs)
+		this.data.Store(rs.Namespace, list)
+	} else {
+		this.data.Store(rs.Namespace, []*v1.ReplicaSet{rs})
+	}
+}
+func (this *RsMapStruct) Update(rs *v1.ReplicaSet) error {
+	if list, ok := this.data.Load(rs.Namespace); ok {
+		for i, range_rs := range list.([]*v1.ReplicaSet) {
+			if range_rs.Name == rs.Name {
+				list.([]*v1.ReplicaSet)[i] = rs
+			}
+		}
+		return nil
+	}
+	return fmt.Errorf("rs-%s not found", rs.Name)
+}
+func (this *RsMapStruct) Delete(rs *v1.ReplicaSet) {
+	if list, ok := this.data.Load(rs.Namespace); ok {
+		for i, range_rs := range list.([]*v1.ReplicaSet) {
+			if range_rs.Name == rs.Name {
+				newList := append(list.([]*v1.ReplicaSet)[:i], list.([]*v1.ReplicaSet)[i+1:]...)
+				this.data.Store(rs.Namespace, newList)
+				break
+			}
+		}
+	}
+}
+
+//普普通通的函数， 就是根据ns获取 对应的rs列表
+func (this *RsMapStruct) ListByNameSpace(ns string) ([]*v1.ReplicaSet, error) {
+	if list, ok := this.data.Load(ns); ok {
+		return list.([]*v1.ReplicaSet), nil
+	}
+	return nil, fmt.Errorf("pods not found ")
 }
 
 type CoreV1Pods []*corev1.Pod
@@ -180,14 +238,22 @@ func (this *PodMapStruct) Delete(pod *corev1.Pod) {
 	}
 }
 
-//根据标签获取 POD列表
+//根据标签获取 POD列表   本方法做了修改
 func (this *PodMapStruct) ListByLabels(ns string, labels []map[string]string) ([]*corev1.Pod, error) {
 	ret := make([]*corev1.Pod, 0)
 	if list, ok := this.data.Load(ns); ok {
-		for _, pod := range list.([]*corev1.Pod) {
+		for _, item := range list.([]*corev1.Pod) {
 			for _, label := range labels {
-				if reflect.DeepEqual(pod.Labels, label) { //标签完全匹配
-					ret = append(ret, pod)
+				i := 0
+				for k1, vv1 := range label {
+					for k2, v2 := range item.Labels {
+						if k1 == k2 && vv1 == v2 {
+							i++
+						}
+					}
+				}
+				if i == len(label) {
+					ret = append(ret, item)
 				}
 			}
 		}
@@ -281,6 +347,7 @@ func (this *IngressMapStruct) Get(ns string, name string) *v1beta1.Ingress {
 	if items, ok := this.data.Load(ns); ok {
 		for _, item := range items.([]*v1beta1.Ingress) {
 			if item.Name == name {
+
 				return item
 			}
 		}
