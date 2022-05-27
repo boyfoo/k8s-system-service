@@ -93,5 +93,6 @@ func (this *K8sConfig) InitInformer() informers.SharedInformerFactory {
 	fact.Rbac().V1().ClusterRoles().Informer().AddEventHandler(this.ClusterRoleHandler)
 	fact.Rbac().V1().ClusterRoleBindings().Informer().AddEventHandler(this.ClusterRoleBindingHandler)
 	fact.Start(wait.NeverStop)
+	//fact.WaitForCacheSync(wait.NeverStop)
 	return fact
 }
